@@ -15,8 +15,8 @@ public class Calculator extends JFrame implements ActionListener {
 
         display = new JTextField("0");
         display.setHorizontalAlignment(JTextField.RIGHT);
-        display.setFont(new Font("Arial", Font.BOLD, 50));
-        display.setPreferredSize(new Dimension(500, 120));
+        display.setFont(new Font("Arial", Font.BOLD, 50)); // 글자 크게
+        display.setPreferredSize(new Dimension(500, 120)); // 높이 크게
         display.setEditable(false);
         add(display, BorderLayout.NORTH);
 
@@ -50,7 +50,7 @@ public class Calculator extends JFrame implements ActionListener {
         String input = e.getActionCommand();
 
         if (input.matches("[0-9]") || input.equals(".")) {
-            if (display.getText().equals("0")) {
+            if (display.getText().equals("0") || display.getText().equals(String.valueOf(num1) + operator)) {
                 display.setText(input);
             } else {
                 display.setText(display.getText() + input);
@@ -64,36 +64,29 @@ public class Calculator extends JFrame implements ActionListener {
                 display.setText(text.substring(0, text.length() - 1));
             }
         } else if (input.equals("=")) {
-            try {
-                double result = evaluate(display.getText());
-                if (result == (long) result) {
-                    display.setText(String.valueOf((long) result));
-                } else {
-                    display.setText(String.valueOf(result));
-                }
-            } catch (Exception ex) {
-                display.setText("Error");
+            num2 = Double.parseDouble(display.getText().replace(String.valueOf(num1) + operator, ""));
+            switch (operator) {
+                case '+':
+                    result = num1 + num2;
+                    break;
+                case '-':
+                    result = num1 - num2;
+                    break;
+                case '×':
+                    result = num1 * num2;
+                    break;
+                case '÷':
+                    if (num2 == 0) {
+                        display.setText("Error");
+                        return;
+                    }
+                    result = num1 / num2;
+                    break;
             }
         } else {
-            // 연산자 입력 (+, -, ×, ÷)
-            String text = display.getText();
-            if (text.endsWith("+") || text.endsWith("-") || text.endsWith("×") || text.endsWith("÷")) {
-                // 연산자가 중복 입력되지 않도록
-                display.setText(text.substring(0, text.length() - 1) + input);
-            } else {
-                display.setText(text + input);
-            }
-        }
-    }
-    private double evaluate(String expression) {
-        expression = expression.replace("×", "*").replace("÷", "/");
-        expression = expression.replaceAll("\\s+", ""); // 공백 제거
-        try {
-            javax.script.ScriptEngineManager manager = new javax.script.ScriptEngineManager();
-            javax.script.ScriptEngine engine = manager.getEngineByName("JavaScript");
-            return((Number) engine.eval(expression)).doubleValue();
-        } catch (Exception ex) {
-            throw new RuntimeException("Invalid");
+            num1 = Double.parseDouble(display.getText());
+            operator = input.charAt(0);
+            display.setText(num1 + " " + operator + " ");
         }
     }
 
